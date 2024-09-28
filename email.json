@@ -1,0 +1,33 @@
+{
+    "email_data": {
+      "events": [
+        {
+          "id": "e1",
+          "content": "Project files attached as requested",
+          "timestamp": "2024-09-28T09:30:00",
+          "isSuspicious": false,
+          "sender": "bob@company.com",
+          "receiver": "alice@company.com",
+          "subject": "RE: Project Files"
+        },
+        {
+          "id": "e2",
+          "content": "Suspicious attachment: invoice.exe",
+          "timestamp": "2024-09-28T10:45:00",
+          "isSuspicious": true,
+          "sender": "unknown@suspicious.com",
+          "receiver": "finance@company.com",
+          "subject": "Urgent: Invoice Attached"
+        },
+        {
+          "id": "e3",
+          "content": "Meeting rescheduled to 3 PM",
+          "timestamp": "2024-09-28T11:00:00",
+          "isSuspicious": false,
+          "sender": "carol@company.com",
+          "receiver": "team@company.com",
+          "subject": "Team Meeting Update"
+        }
+      ]
+    }
+  }
