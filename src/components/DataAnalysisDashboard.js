@@ -1,21 +1,54 @@
-import React, { useState } from 'react';
-import { Search, Calendar, MessageSquare, Mail, File, X, Check, Upload } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import UploadSection from './UploadSection';
+import SearchBar from './SearchBar';
+import NavigationTabs from './NavigationTabs';
+import TimelineView from './TimelineView';
+import AnalysisView from './AnalysisView';
+
+// Initialize Supabase client
+const supabaseUrl = 'https://vwumohgechgpnojjvobh.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3dW1vaGdlY2hncG5vamp2b2JoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzEyOTE5NDIsImV4cCI6MjA0Njg2Nzk0Mn0.aW2UM9uAVNY19uFzi6-cv70P85E8xS3Eq3fPwJQeNPE';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const DataAnalysisDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTab, setSelectedTab] = useState('timeline');
   const [events, setEvents] = useState([]);
   const [uploadStatus, setUploadStatus] = useState({ whatsapp: false, email: false, file: false });
+  const [loading, setLoading] = useState(false);
 
-  const handleFileUpload = (type) => (e) => {
+  // Fetch events from Supabase on component mount
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .order('timestamp', { ascending: false });
+
+      if (error) throw error;
+      setEvents(data || []);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      alert('Error fetching events. Please try again.');
+    }
+  };
+
+  const handleFileUpload = (type) => async (e) => {
     const file = e.target.files[0];
     if (file) {
+      setLoading(true);
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
         try {
           const jsonData = JSON.parse(event.target.result);
           let newEvents = [];
           
+          // Convert JSON data into events
           if (type === 'whatsapp' && jsonData.whatsapp_data) {
             newEvents = jsonData.whatsapp_data.events.map(event => ({...event, type}));
           } else if (type === 'email' && jsonData.email_data) {
@@ -26,146 +59,79 @@ const DataAnalysisDashboard = () => {
             throw new Error("Invalid JSON structure");
           }
 
-          setEvents(prevEvents => [...prevEvents, ...newEvents]);
+          // Send each event to the backend for analysis and storage
+          await Promise.all(
+            newEvents.map(async (event) => {
+              await fetch('http://localhost:8000/api/analyze-text', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                      text: event.content,
+                      source: type,
+                      metadata: {
+                          sender: event.sender,
+                          receiver: event.receiver,
+                          user: event.user,
+                          action: event.action,
+                          filePath: event.filePath
+                      }
+                  })
+              });
+            })
+          );
+
+          // Update upload status and refresh the events list from Supabase
           setUploadStatus(prev => ({...prev, [type]: true}));
+          fetchEvents(); // Fetch all events directly from Supabase
+
         } catch (error) {
-          console.error("Error parsing JSON:", error);
-          alert("Error parsing JSON file. Please ensure it's a valid JSON with the correct structure.");
+          console.error("Error processing data:", error);
+          alert("Error processing data. Please try again.");
+        } finally {
+          setLoading(false);
         }
       };
       reader.readAsText(file);
     }
   };
 
+
   const filteredEvents = events.filter(event => 
     event.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const renderIcon = (type) => {
-    switch (type) {
-      case 'whatsapp': return <MessageSquare className="w-4 h-4" />;
-      case 'email': return <Mail className="w-4 h-4" />;
-      case 'file': return <File className="w-4 h-4" />;
-      default: return null;
-    }
-  };
-
-  const renderStatusIcon = (isSuspicious) => {
-    return isSuspicious ? 
-      <X className="w-4 h-4 text-red-500" /> : 
-      <Check className="w-4 h-4 text-green-500" />;
-  };
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
       <div className="bg-white shadow rounded-lg p-6">
         <h2 className="text-2xl font-bold mb-4">Crime Forensic toolkit (FTK)</h2>
         
-        <div className="flex flex-wrap gap-2 mb-4">
-          {['whatsapp', 'email', 'file'].map((type) => (
-            <div key={type} className="flex items-center">
-              <input
-                type="file"
-                id={`${type}Upload`}
-                className="hidden"
-                onChange={handleFileUpload(type)}
-                accept=".json"
-              />
-              <label
-                htmlFor={`${type}Upload`}
-                className="flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                Upload {type.charAt(0).toUpperCase() + type.slice(1)} Data
-              </label>
+        {loading && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white p-4 rounded">
+              <p>Processing data...</p>
             </div>
-          ))}
-        </div>
-
-        {Object.values(uploadStatus).some(status => status) && (
-          <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
-            <p className="font-bold">Data uploaded:</p>
-            <p>{Object.entries(uploadStatus)
-              .filter(([_, status]) => status)
-              .map(([type]) => type.charAt(0).toUpperCase() + type.slice(1))
-              .join(', ')}
-            </p>
           </div>
         )}
 
-        <div className="flex items-center space-x-2 mb-4">
-          <Search className="w-4 h-4 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search keywords or phrases..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-grow border rounded px-2 py-1"
-          />
-          <button className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600">
-            Search
-          </button>
-        </div>
+        <UploadSection 
+          handleFileUpload={handleFileUpload} 
+          uploadStatus={uploadStatus} 
+        />
 
-        <div className="mb-4">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex">
-              <button
-                className={`mr-1 ${
-                  selectedTab === 'timeline'
-                    ? 'border-b-2 border-blue-500 text-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
-                } font-medium text-sm py-4 px-1`}
-                onClick={() => setSelectedTab('timeline')}
-              >
-                <Calendar className="w-4 h-4 mr-2 inline" />
-                Timeline
-              </button>
-              <button
-                className={`mr-1 ${
-                  selectedTab === 'analysis'
-                    ? 'border-b-2 border-blue-500 text-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
-                } font-medium text-sm py-4 px-1`}
-                onClick={() => setSelectedTab('analysis')}
-              >
-                <Search className="w-4 h-4 mr-2 inline" />
-                Analysis
-              </button>
-            </nav>
-          </div>
-        </div>
+        <SearchBar 
+          searchTerm={searchTerm} 
+          setSearchTerm={setSearchTerm} 
+        />
 
-        {selectedTab === 'timeline' && (
-          <div className="space-y-4">
-            {filteredEvents.map(event => (
-              <div key={event.id} className="bg-gray-50 rounded-lg p-4 flex items-center justify-between">
-                <div className="flex items-center">
-                  {renderIcon(event.type)}
-                  <div className="ml-4">
-                    <p className="font-semibold">{event.content}</p>
-                    <p className="text-sm text-gray-500">{new Date(event.timestamp).toLocaleString()}</p>
-                    {event.type === 'whatsapp' && (
-                      <p className="text-xs text-gray-400">From: {event.sender} To: {event.receiver}</p>
-                    )}
-                    {event.type === 'email' && (
-                      <p className="text-xs text-gray-400">From: {event.sender} To: {event.receiver} Subject: {event.subject}</p>
-                    )}
-                    {event.type === 'file' && (
-                      <p className="text-xs text-gray-400">User: {event.user} Action: {event.action} Path: {event.filePath}</p>
-                    )}
-                  </div>
-                </div>
-                {renderStatusIcon(event.isSuspicious)}
-              </div>
-            ))}
-          </div>
-        )}
+        <NavigationTabs 
+          selectedTab={selectedTab} 
+          setSelectedTab={setSelectedTab} 
+        />
 
-        {selectedTab === 'analysis' && (
-          <div className="bg-gray-50 rounded-lg p-4">
-            <p>Analysis features would be implemented here, such as keyword frequency, data visualizations, etc.</p>
-          </div>
+        {selectedTab === 'timeline' ? (
+          <TimelineView events={filteredEvents} />
+        ) : (
+          <AnalysisView events={filteredEvents} />
         )}
       </div>
     </div>

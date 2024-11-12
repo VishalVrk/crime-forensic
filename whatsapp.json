@@ -1,38 +1,30 @@
 {
-    "whatsapp_data": {
+  "whatsapp_data": {
       "events": [
-        {
-          "id": "w1",
-          "content": "Hey, can you send me the project files?",
-          "timestamp": "2024-09-28T09:15:00",
-          "isSuspicious": false,
-          "sender": "Alice",
-          "receiver": "Bob"
-        },
-        {
-          "id": "w2",
-          "content": "Sure, I'll email them to you in a minute.",
-          "timestamp": "2024-09-28T09:16:30",
-          "isSuspicious": false,
-          "sender": "Bob",
-          "receiver": "Alice"
-        },
-        {
-          "id": "w3",
-          "content": "Can you also share the login credentials for the server?",
-          "timestamp": "2024-09-28T09:20:00",
-          "isSuspicious": true,
-          "sender": "Alice",
-          "receiver": "Bob"
-        },
-        {
-          "id": "w4",
-          "content": "I don't think I should share that over WhatsApp. Let's discuss this in person.",
-          "timestamp": "2024-09-28T09:22:00",
-          "isSuspicious": false,
-          "sender": "Bob",
-          "receiver": "Alice"
-        }
+          {
+              "id": "123e4567-e89b-12d3-a456-426614174000",
+              "content": "Hey, can you send me the project files?",
+              "timestamp": "2024-09-28T09:15:00",
+              "is_suspicious": false,
+              "sender": "Alice",
+              "receiver": "Bob"
+          },
+          {
+              "id": "123e4567-e89b-12d3-a456-426614174001",
+              "content": "Sure, I'll email them to you in a minute.",
+              "timestamp": "2024-09-28T09:16:30",
+              "is_suspicious": false,
+              "sender": "Bob",
+              "receiver": "Alice"
+          },
+          {
+              "id": "123e4567-e89b-12d3-a456-426614174002",
+              "content": "Can you also share the login credentials for the server?",
+              "timestamp": "2024-09-28T09:20:00",
+              "is_suspicious": true,
+              "sender": "Alice",
+              "receiver": "Bob"
+          }
       ]
-    }
   }
+}
