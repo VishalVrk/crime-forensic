@@ -62,7 +62,7 @@ const DataAnalysisDashboard = () => {
           // Send each event to the backend for analysis and storage
           await Promise.all(
             newEvents.map(async (event) => {
-              await fetch('http://localhost:8000/api/analyze-text', {
+              await fetch('https://crime-app-backend.onrender.com/api/analyze-text', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({

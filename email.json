@@ -1,33 +1,33 @@
 {
-    "email_data": {
-      "events": [
-        {
-          "id": "e1",
-          "content": "Project files attached as requested",
-          "timestamp": "2024-09-28T09:30:00",
-          "is_suspicious": false,
-          "sender": "bob@company.com",
-          "receiver": "alice@company.com",
-          "subject": "RE: Project Files"
-        },
-        {
-          "id": "e2",
-          "content": "Suspicious attachment: invoice.exe",
-          "timestamp": "2024-09-28T10:45:00",
-          "is_suspicious": true,
-          "sender": "unknown@suspicious.com",
-          "receiver": "finance@company.com",
-          "subject": "Urgent: Invoice Attached"
-        },
-        {
-          "id": "e3",
-          "content": "Meeting rescheduled to 3 PM",
-          "timestamp": "2024-09-28T11:00:00",
-          "is_suspicious": false,
-          "sender": "carol@company.com",
-          "receiver": "team@company.com",
-          "subject": "Team Meeting Update"
-        }
-      ]
-    }
+  "email_data": {
+    "events": [
+      {
+        "id": "1d4e4567-e89b-12d3-a456-426614174001",
+        "content": "Project files attached as requested",
+        "timestamp": "2024-09-28T09:30:00",
+        "is_suspicious": false,
+        "sender": "bob@company.com",
+        "receiver": "alice@company.com",
+        "subject": "RE: Project Files"
+      },
+      {
+        "id": "1d4e4567-e89b-12d3-a456-426614174002",
+        "content": "Suspicious attachment: invoice.exe",
+        "timestamp": "2024-09-28T10:45:00",
+        "is_suspicious": true,
+        "sender": "unknown@suspicious.com",
+        "receiver": "finance@company.com",
+        "subject": "Urgent: Invoice Attached"
+      },
+      {
+        "id": "1d4e4567-e89b-12d3-a456-426614174003",
+        "content": "Meeting rescheduled to 3 PM",
+        "timestamp": "2024-09-28T11:00:00",
+        "is_suspicious": false,
+        "sender": "carol@company.com",
+        "receiver": "team@company.com",
+        "subject": "Team Meeting Update"
+      }
+    ]
   }
+}
